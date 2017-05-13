@@ -5,18 +5,20 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.SimpleAdapter;
+import android.widget.Toast;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+/**
+ * Created by alanjet on 2016/7/24.
+ */
 public class ShowVideoActivity extends AppCompatActivity {
     private GridView gridView;
     private List<Map<String, Object>> items;
@@ -31,19 +33,16 @@ public class ShowVideoActivity extends AppCompatActivity {
         GetFiles();
         SimpleAdapter adapter = new SimpleAdapter(this,items,R.layout.item_show_video,
                 new String[]{"imageItem", "textItem"},new int[]{R.id.image_item, R.id.text_item});
-        if(adapter!=null){
-            gridView.setAdapter(adapter);
-            gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    Uri uri = Uri.parse("sdcard/VideoRecorderTest/"+FileToStr(videoList)[position]);//调用系统自带的播放器
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setDataAndType(uri, "video/*");
-                    startActivity(intent);
-                }
-            });
-        }
-
+        gridView.setAdapter(adapter);
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Uri uri = Uri.parse(Environment.getExternalStorageDirectory().getPath()+"/VideoRecorderTest/"+FileToStr(videoList)[position]);//调用系统自带的播放器
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setDataAndType(uri, "video/*");
+                startActivity(intent);
+            }
+        });
     }
     /**
      * 把文件列表转换成字符串
@@ -62,16 +61,18 @@ public class ShowVideoActivity extends AppCompatActivity {
      */
     public void GetFiles(  ){
         int i=0;
-        File filePath=new File("sdcard/VideoRecorderTest");
+        File filePath=new File(Environment.getExternalStorageDirectory().getPath()+"/VideoRecorderTest");
         if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
-            File[] files = filePath.listFiles();
-            for(i=0;i<files.length;i++){
-                 if(files[i].getName().toLowerCase().endsWith(".mp4")) {
-                     videoList.add(files[i]);
+            if(filePath.listFiles()!=null){
+                File[] files = filePath.listFiles();
+                for(i=0;i<files.length;i++){
+                    if(files[i].getName().toLowerCase().endsWith(".mp4")) {
+                        videoList.add(files[i]);
+                    }
                 }
+            }else{
+                Toast.makeText(ShowVideoActivity.this,"目前文件夹还没有文件",Toast.LENGTH_SHORT).show();
             }
-
-
         }
         items = new ArrayList<Map<String,Object>>();
         for (int j = 0; j <i; j++) {
@@ -84,12 +85,4 @@ public class ShowVideoActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if(event.getAction()==KeyEvent.KEYCODE_BACK){
-            Intent intent=new Intent(ShowVideoActivity.this,MainActivity.class);
-            startActivity(intent);
-        }
-        return super.onKeyDown(keyCode, event);
-    }
 }

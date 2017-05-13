@@ -1,6 +1,5 @@
 package com.alanjet.videorecordertest;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -8,81 +7,175 @@ import android.graphics.PixelFormat;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
-import android.os.Build;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Chronometer;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Calendar;
 
 public class MainActivity extends Activity implements SurfaceHolder.Callback {
     private static final String TAG = "MainActivity";
-    private SurfaceView mSurfaceview;
+    private SurfaceView mSurfaceView;
     private ImageButton mBtnStartStop;
     private ImageButton mBtnSet;
     private ImageButton mBtnShowFile;
-    private boolean mStartedFlg = false;
-    private MediaRecorder mRecorder;
-    private SurfaceHolder mSurfaceHolder;
-    private Camera myCamera;
-    private Camera.Parameters myParameters;
-    private Camera.AutoFocusCallback mAutoFocusCallback=null;
-    private boolean isView = false;
+    private Chronometer mTimer;
+    private SurfaceHolder mHolder;
+    private Camera mCamera;
+    private MediaRecorder mMediaRecorder;
+    private Camera.Parameters mParameters;
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //重写AutoFocusCallback接口
-        mAutoFocusCallback=new Camera.AutoFocusCallback() {
-        @Override
-        public void onAutoFocus(boolean success, Camera camera) {
-            if(success){
-                Log.i(TAG, "AutoFocus: success...");
-            }else {
-                Log.i(TAG, "AutoFocus: failure...");
+        initWindowFeature();
+        setContentView(R.layout.activity_main);
+        initView();
+        initCameraAndSurfaceViewHolder();
+        prepareMediaRecorder();
+    }
+
+    private void initCameraAndSurfaceViewHolder() {
+        mHolder = mSurfaceView.getHolder();
+        mHolder.addCallback(this);
+        mCamera=Camera.open();
+    }
+
+    private void initListeners() {
+        mBtnStartStop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG,"录像");
+                if (isRecording()) {
+                    Log.d(TAG,"停止录像");
+                    stopRecording();
+                    mTimer.stop();
+                    mBtnStartStop.setBackgroundResource(R.drawable.rec_start);
+                } else {
+                    if (startRecording()) {
+                        Log.d(TAG,"开始录像");
+                        mTimer.setBase(SystemClock.elapsedRealtime());
+                        mTimer.start();
+                        mBtnStartStop.setBackgroundResource(R.drawable.rec_stop);
+                    }
+                }
+            }
+        });
+        mBtnSet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG,"设置");
+                Toast.makeText(MainActivity.this,"设置待开发...",Toast.LENGTH_SHORT).show();
+            }
+        });
+        mBtnShowFile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(MainActivity.this,ShowVideoActivity.class);
+                startActivity(intent);
+            }
+        });
+
+    }
+
+    private boolean prepareMediaRecorder() {
+        mMediaRecorder = new MediaRecorder();
+        mCamera.unlock();
+        mMediaRecorder.setCamera(mCamera);
+        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
+        mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+        mMediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_1080P));
+        mMediaRecorder.setPreviewDisplay(mHolder.getSurface());
+        String path = getSDPath();
+        if (path != null) {
+
+            File dir = new File(path + "/VideoRecorderTest");
+            if (!dir.exists()) {
+                dir.mkdir();
+            }
+            path = dir + "/" + getDate() + ".mp4";
+            mMediaRecorder.setOutputFile(path);
+            try {
+                mMediaRecorder.prepare();
+            } catch (IOException e) {
+                releaseMediaRecorder();
+                e.printStackTrace();
             }
         }
-    };
+        return true;
+    }
 
-    initScreen();
-    setContentView(R.layout.activity_main);
-    mSurfaceview  = (SurfaceView)findViewById(R.id.capture_surfaceview);
-    mBtnStartStop = (ImageButton) findViewById(R.id.ib_stop);
-    mBtnSet= (ImageButton) findViewById(R.id.capture_imagebutton_setting);
-    mBtnShowFile= (ImageButton) findViewById(R.id.capture_imagebutton_showfiles);
-    mBtnShowFile.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            Intent intent=new Intent(MainActivity.this,ShowVideoActivity.class);
-            startActivity(intent);
-            finish();
+    private void releaseMediaRecorder() {
+        if (mMediaRecorder != null) {
+            mMediaRecorder.reset();
+            mMediaRecorder.release();
+            mMediaRecorder = null;
+            mCamera.lock();
         }
-    });
-    mBtnSet.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            Toast.makeText(MainActivity.this,"相机设置待开发~",Toast.LENGTH_SHORT).show();
+    }
+    public boolean startRecording() {
+        if (prepareMediaRecorder()) {
+            mMediaRecorder.start();
+            return true;
+        } else {
+            releaseMediaRecorder();
         }
-    });
+        return false;
+    }
 
-    SurfaceHolder holder = mSurfaceview.getHolder();// 取得holder
+    public void stopRecording() {
+        if (mMediaRecorder != null) {
+            mMediaRecorder.stop();
+        }
+        releaseMediaRecorder();
+    }
 
-    holder.addCallback(this); // holder加入回调接口
+    private void initView() {
+        mSurfaceView  = (SurfaceView)findViewById(R.id.capture_surfaceview);
+        mBtnStartStop = (ImageButton) findViewById(R.id.ib_stop);
+        mBtnSet= (ImageButton) findViewById(R.id.capture_imagebutton_setting);
+        mBtnShowFile= (ImageButton) findViewById(R.id.capture_imagebutton_showfiles);
+        mTimer= (Chronometer) findViewById(R.id.crm_count_time);
+    }
 
-    // setType必须设置，要不出错.
-    holder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+    public boolean isRecording() {
+        return mMediaRecorder != null;
+    }
 
-}
+    @Override
+    protected void onResume() {
+        super.onResume();
+        setContentView(R.layout.activity_main);
+        initView();
+        initCameraAndSurfaceViewHolder();
+        initListeners();
+    }
+
+    private void initWindowFeature() {
+        requestWindowFeature(Window.FEATURE_NO_TITLE);// 去掉标题栏
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);// 设置全屏
+
+        // 设置横屏显示
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
+        // 选择支持半透明模式,在有SurfaceView的activity中使用。
+        getWindow().setFormat(PixelFormat.TRANSLUCENT);
+    }
 
     /**
-     * 获取系统时间，保存文件以系统时间戳命名
+     * 获取系统时间
      */
     public static String getDate(){
         Calendar ca = Calendar.getInstance();
@@ -103,157 +196,98 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
      * 获取SD path
      */
     public String getSDPath(){
-        File sdDir = null;
+        File sdDir;
         boolean sdCardExist = Environment.getExternalStorageState()
                 .equals(android.os.Environment.MEDIA_MOUNTED); // 判断sd卡是否存在
         if (sdCardExist)
         {
-            sdDir = Environment.getExternalStorageDirectory();// 获取跟目录
+            sdDir = Environment.getExternalStorageDirectory();// 获取外部存储的根目录
             return sdDir.toString();
         }
 
         return null;
     }
-
-    //初始化屏幕设置
-    public void initScreen(){
-        requestWindowFeature(Window.FEATURE_NO_TITLE);// 去掉标题栏
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);// 设置全屏
-
-        // 设置横屏显示
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-
-        // 选择支持半透明模式,在有surfaceview的activity中使用。
-        getWindow().setFormat(PixelFormat.TRANSLUCENT);
-    }
-
-    //初始化Camera设置
-    public void initCamera()
-    {
-        if(myCamera == null && !isView)
-        {
-            myCamera = Camera.open();
-            Log.i(TAG, "camera.open");
-        }
-        if(myCamera != null && !isView) {
-            try {
-                myParameters = myCamera.getParameters();
-                myParameters.setPreviewSize(1920, 1080);
-                //设置对焦模式
-                myParameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
-                myCamera.setParameters(myParameters);
-                myCamera.setPreviewDisplay(mSurfaceHolder);
-                myCamera.startPreview();
-                isView = true;
-            } catch (Exception e) {
-                // TODO: handle exception
-                e.printStackTrace();
-                Toast.makeText(MainActivity.this, "初始化相机错误",
-                        Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width,
-                               int height) {
-        // TODO Auto-generated method stub
-        mSurfaceHolder = holder;
-    }
-
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        // TODO Auto-generated method stub
-        mSurfaceHolder = holder;
-        initCamera();
-        mBtnStartStop.setOnClickListener(new View.OnClickListener() {
-
-            @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+        mParameters=mCamera.getParameters();
+        mParameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+        mCamera.setParameters(mParameters);
+        mCamera.autoFocus(new Camera.AutoFocusCallback() {
             @Override
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-
-                if (!mStartedFlg) {
-                    // Start
-                    if (mRecorder == null) {
-                        mRecorder = new MediaRecorder(); // Create MediaRecorder
-                    }
-                    try {
-                        myCamera.unlock();
-                        mRecorder.setCamera(myCamera);
-                        // Set audio and video source and encoder
-                        // 这两项需要放在setOutputFormat之前
-                        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-                        mRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-                        mRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_720P));
-                        mRecorder.setPreviewDisplay(mSurfaceHolder.getSurface());
-
-                        // Set output file path
-                        String path = getSDPath();
-                        if (path != null) {
-
-                            File dir = new File(path + "/VideoRecorderTest");
-                            if (!dir.exists()) {
-                                dir.mkdir();
-                            }
-                            path = dir + "/" + getDate() + ".mp4";
-                            mRecorder.setOutputFile(path);
-                            Log.d(TAG, "bf mRecorder.prepare()");
-                            mRecorder.prepare();
-                            Log.d(TAG, "af mRecorder.prepare()");
-                            Log.d(TAG, "bf mRecorder.start()");
-                            mRecorder.start();   // Recording is now started
-                            Log.d(TAG, "af mRecorder.start()");
-                            mStartedFlg = true;
-                            mBtnStartStop.setBackground(getDrawable(R.drawable.rec_stop));
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    // stop
-                    if (mStartedFlg) {
-                        try {
-                            mRecorder.stop();
-                            mRecorder.reset();
-                            mBtnStartStop.setBackground(getDrawable(R.drawable.rec_start));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    mStartedFlg = false;
+            public void onAutoFocus(boolean success, Camera camera) {
+                if(success){
+                    Log.d(TAG,"自动对焦成功");
                 }
             }
-
         });
+        try {
+            mCamera.setPreviewDisplay(holder);
+            mCamera.startPreview();
+
+            //下面这个方法能帮我们获取到相机预览帧，我们可以在这里实时地处理每一帧
+            mCamera.setPreviewCallback(new Camera.PreviewCallback() {
+                @Override
+                public void onPreviewFrame(byte[] data, Camera camera) {
+                    Log.i(TAG, "获取预览帧...");
+                    new ProcessFrameAsyncTask().execute(data);
+                    Log.d(TAG,"预览帧大小："+String.valueOf(data.length));
+                }
+            });
+        } catch (IOException e) {
+            Log.d(TAG,"设置相机预览失败",e);
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        // TODO Auto-generated method stub
-        // surfaceDestroyed的时候同时对象设置为null
-        mSurfaceview = null;
-        mSurfaceHolder = null;
-        if (mRecorder != null) {
-            mRecorder.release();
-            mRecorder = null;
+        mHolder.removeCallback(this);
+        mCamera.setPreviewCallback(null);
+        mCamera.stopPreview();
+        mCamera.release();
+        mCamera = null;
+    }
+
+    private class ProcessFrameAsyncTask extends AsyncTask<byte[],Void,String> {
+
+        @Override
+        protected String doInBackground(byte[]... params) {
+            processFrame(params[0]);
+            return null;
         }
-    }
 
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-    }
+        private void processFrame(byte[] frameData) {
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
+            Log.i(TAG, "正在处理预览帧...");
+            Log.i(TAG, "预览帧大小"+String.valueOf(frameData.length));
+            Log.i(TAG, "预览帧处理完毕...");
+            //下面这段注释掉的代码是把预览帧数据输出到sd卡中，以.yuv格式保存
+//            String path = getSDPath();
+//            File dir = new File(path + "/FrameTest");
+//            if (!dir.exists()) {
+//                dir.mkdir();
+//            }
+//            path = dir + "/" + "testFrame"+".yuv";
+//            File file =new File(path);
+//            try {
+//                FileOutputStream fileOutputStream=new FileOutputStream(file);
+//                BufferedOutputStream bufferedOutputStream=new BufferedOutputStream(fileOutputStream);
+//                bufferedOutputStream.write(frameData);
+//                Log.i(TAG, "预览帧处理完毕...");
+//
+//            } catch (FileNotFoundException e) {
+//                e.printStackTrace();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+        }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
+
     }
 }
 
