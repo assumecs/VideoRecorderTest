@@ -15,6 +15,7 @@ import android.os.StatFs;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -69,7 +70,7 @@ public class LoginActivity extends Activity {
             msg = "用户名不能为空";
         } else if(inputPwd.trim().equals("")){
             msg = "密码不能为空";
-        } else if(!name.equals(inputName) || !pwd.equals(inputName)){
+        } else if(!name.equals(inputName) || !pwd.equals(inputPwd)){
             msg = getResources().getString(R.string.login_wrong);
         }else {
             askPermission();
@@ -89,7 +90,10 @@ public class LoginActivity extends Activity {
             if(pers.size() == 0){
                 toMain();
             } else {
-//                this.requestPermissions(permissions, PERMISSION_CODE);
+                String[] asks = new String[pers.size()];
+                pers.toArray(asks);
+                Log.d("ask", asks.toString());
+                this.requestPermissions(asks, PERMISSION_CODE);
             }
         } else {
             toMain();
@@ -98,7 +102,7 @@ public class LoginActivity extends Activity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if(requestCode == PERMISSION_CODE){
+        if(requestCode != PERMISSION_CODE){
             return;
         }
         for(int r:grantResults)
@@ -114,7 +118,7 @@ public class LoginActivity extends Activity {
 
     private void toMain(){
         long availableSize = getAvailableExternalMemorySize();
-        if(availableSize <= 1024L * 1024 * 1024 * 10){
+        if(availableSize <= 1024L * 1024 * 1024 * 1){
             showWarn();
         } else {
             startActivity(new Intent(this, MainActivity.class));
@@ -124,7 +128,7 @@ public class LoginActivity extends Activity {
 
     private void showWarn(){
         AlertDialog dialog = new AlertDialog.Builder(this).create();
-        dialog.setMessage("您的手机存储空间小于10G，请清理存储后重试");
+        dialog.setMessage("您的手机存储空间小于1G，请清理存储后重试");
         dialog.setButton(Dialog.BUTTON_POSITIVE, "确定", new DialogInterface.OnClickListener(){
 
             @Override
