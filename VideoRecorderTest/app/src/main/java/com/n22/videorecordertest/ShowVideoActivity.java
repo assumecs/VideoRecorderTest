@@ -1,10 +1,10 @@
-package com.alanjet.videorecordertest;
+package com.n22.videorecordertest;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
@@ -19,7 +19,7 @@ import java.util.Map;
 /**
  * Created by alanjet on 2016/7/24.
  */
-public class ShowVideoActivity extends AppCompatActivity {
+public class ShowVideoActivity extends Activity {
     private GridView gridView;
     private List<Map<String, Object>> items;
     private List<File> videoList ;

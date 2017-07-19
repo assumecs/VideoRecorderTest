@@ -1,4 +1,4 @@
-package com.alanjet.videorecordertest;
+package com.n22.videorecordertest;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

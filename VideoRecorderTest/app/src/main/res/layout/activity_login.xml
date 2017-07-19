@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.n22.videorecordertest.com.n22.videorecordertest.LoginActivity">
+        <LinearLayout
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:orientation="vertical">
+                <EditText
+                    android:id="@+id/name"
+                    android:layout_width="match_parent"
+                    style="@android:style/Theme.Holo.InputMethod"
+                    android:hint="请输入用户名"
+                    android:layout_height="wrap_content" />
+                <EditText
+                    android:id="@+id/pwd"
+                    android:layout_width="match_parent"
+                    style="@android:style/Theme.Holo.InputMethod"
+                    android:hint="请输入密码"
+                    android:inputType="textPassword"
+                    android:layout_height="wrap_content" />
+                <Button
+                    android:id="@+id/login"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#3399ff"
+                    android:textSize="20sp"
+                    android:textAlignment="center"
+                    android:textColor="@color/white_overlay"
+                    android:text="登 录"/>
+        </LinearLayout>
+        <TextView
+            android:id="@+id/notice"
+            android:text="账号：abc 密码：a123456"
+            android:textSize="12sp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+</RelativeLayout>

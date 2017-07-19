@@ -1,4 +1,4 @@
-package com.alanjet.videorecordertest;
+package com.n22.videorecordertest;
 
 import org.junit.Test;
 

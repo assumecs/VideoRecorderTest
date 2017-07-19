@@ -37,4 +37,7 @@
     <string name="appversion">app version</string>
     <string name="aboutapp">about app</string>
     <string name="aboutappprompt">app instruction and QA</string>
+    <string name="username">abc</string>
+    <string name="pwd">a123456</string>
+    <string name="login_wrong">登录失败，账号或密码有误</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.alanjet.videorecordertest;
+package com.n22.videorecordertest;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -19,7 +19,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Chronometer;
 import android.widget.ImageButton;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +42,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         setContentView(R.layout.activity_main);
         initView();
         initCameraAndSurfaceViewHolder();
-        prepareMediaRecorder();
+//        prepareMediaRecorder();
     }
 
     private void initCameraAndSurfaceViewHolder() {
@@ -75,8 +74,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         mBtnSet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG,"设置");
-                Toast.makeText(MainActivity.this,"设置待开发...",Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "暂停");
+//                mTimer.
+//                Log.d(TAG,"设置");
+//                Toast.makeText(MainActivity.this,"设置待开发...",Toast.LENGTH_SHORT).show();
             }
         });
         mBtnShowFile.setOnClickListener(new View.OnClickListener() {
@@ -212,14 +213,14 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback {
         mParameters=mCamera.getParameters();
         mParameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
         mCamera.setParameters(mParameters);
-        mCamera.autoFocus(new Camera.AutoFocusCallback() {
-            @Override
-            public void onAutoFocus(boolean success, Camera camera) {
-                if(success){
-                    Log.d(TAG,"自动对焦成功");
-                }
-            }
-        });
+//        mCamera.autoFocus(new Camera.AutoFocusCallback() {
+//            @Override
+//            public void onAutoFocus(boolean success, Camera camera) {
+//                if(success){
+//                    Log.d(TAG,"自动对焦成功");
+//                }
+//            }
+//        });
         try {
             mCamera.setPreviewDisplay(holder);
             mCamera.startPreview();
