@@ -1,5 +1,6 @@
 package com.n22.videorecordertest;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -8,12 +9,13 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 
+import com.n22.pages.LocalFragment;
 import com.n22.pages.ToUploadFragment;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ListActivity extends AppCompatActivity {
+public class ListActivity extends AppCompatActivity implements LocalFragment.OnFragmentInteractionListener {
 
     private TabLayout tabLayout;
     private ViewPager viewPager;
@@ -32,13 +34,18 @@ public class ListActivity extends AppCompatActivity {
         tabLayout = (TabLayout) findViewById(R.id.tablayout);
         //页面，数据源
         list = new ArrayList<>();
-        list.add(new ToUploadFragment());
-        list.add(new ToUploadFragment());
+        list.add(new LocalFragment());
+        list.add(new LocalFragment());
         //ViewPager的适配器
         adapter = new MyAdapter(getSupportFragmentManager());
         viewPager.setAdapter(adapter);
         //绑定
         tabLayout.setupWithViewPager(viewPager);
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+        //fragment 数据传递
     }
 
     class MyAdapter extends FragmentPagerAdapter {

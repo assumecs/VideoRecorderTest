@@ -68,10 +68,11 @@ public class LoginActivity extends Activity {
         String inputPwd = pwdView.getText().toString();
         if(inputName.trim().equals("")){
             msg = "用户名不能为空";
-        } else if(inputPwd.trim().equals("")){
-            msg = "密码不能为空";
-        } else if(!name.equals(inputName) || !pwd.equals(inputPwd)){
-            msg = getResources().getString(R.string.login_wrong);
+            // for show
+//        } else if(inputPwd.trim().equals("")){
+//            msg = "密码不能为空";
+//        } else if(!name.equals(inputName) || !pwd.equals(inputPwd)){
+//            msg = getResources().getString(R.string.login_wrong);
         }else {
             askPermission();
             return;
@@ -121,7 +122,7 @@ public class LoginActivity extends Activity {
         if(availableSize <= 1024L * 1024 * 1024 * 1){
             showWarn();
         } else {
-            startActivity(new Intent(this, MainActivity.class));
+            startActivity(new Intent(this, ListActivity.class));
             finish();
         }
     }

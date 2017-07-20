@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@android:id/text1"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <TextView
-        android:id="@+id/policy_no"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-</LinearLayout>
+    android:layout_height="20dp"
+    android:textAppearance="?android:attr/textAppearanceListItemSmall"
+    android:gravity="center_vertical"
+    android:textColor="@android:color/black"
+    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+    android:minHeight="?android:attr/listPreferredItemHeightSmall" />
