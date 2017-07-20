@@ -14,16 +14,18 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.n22.videorecordertest.MainActivity"></activity>
-        <activity android:name="com.n22.videorecordertest.SetVideoActivity" />
-        <activity android:name="com.n22.videorecordertest.ShowVideoActivity" />
-        <activity android:name="com.n22.videorecordertest.LoginActivity">
+        <activity android:name=".MainActivity" />
+        <activity android:name=".SetVideoActivity" />
+        <activity android:name=".ShowVideoActivity" />
+        <activity android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".RecordActivity" />
+        <activity android:name=".ListActivity"></activity>
     </application>
 
 </manifest>
