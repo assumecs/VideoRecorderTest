@@ -1,1 +1,1 @@
-include ':app', ':cptr'
+include ':app', ':cptr', ':oss'

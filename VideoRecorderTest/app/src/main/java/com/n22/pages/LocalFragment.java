@@ -144,9 +144,9 @@ public class LocalFragment extends Fragment {
     }
 
     private void init() {
-        for (int i = 0; i < 17; i++) {
-            mData.add(new String("  RecyclerView item  -" + i));
-        }
+//        for (int i = 0; i < 17; i++) {
+//            mData.add(new String("  RecyclerView item  -" + i));
+//        }
         adapter = new RecyclerAdapter(getContext(), mData);
         mAdapter = new RecyclerAdapterWithHF(adapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));

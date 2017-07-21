@@ -157,10 +157,10 @@ public class RecordActivity extends Activity implements SurfaceHolder.Callback {
     @Override
     protected void onResume() {
         super.onResume();
-        setContentView(R.layout.activity_main);
-        initView();
-        initCameraAndSurfaceViewHolder();
-        initListeners();
+//        setContentView(R.layout.activity_record);
+//        initView();
+//        initCameraAndSurfaceViewHolder();
+//        initListeners();
     }
 
     private void initWindowFeature() {
